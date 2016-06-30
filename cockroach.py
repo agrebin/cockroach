@@ -7,8 +7,10 @@ class Topic(object):
         self.parititions=[]
 
 class Offset(object):
-    def __init__(self,Topic,zk_client):
-        self.topic=Topic
+    def __init__(self,topic,partition,KazooClient()):
+        self.topic=topic
+        self.partition=partition
+        self.offset=offset
 
 class Consumer(object):
     def __init__(self,id,zk_client):
@@ -17,13 +19,26 @@ class Consumer(object):
         subcscriptions[]
 
 class ConsumerGroup(object):
-    def __init__(self,gid,zk_client):
+    def __init__(self,gid,KazooClient()):
         self.gid=gid    
+        self.zk_client=zk_client
         self.offsets=self.get_offsets()
         self.owners=self.get_owners()
         self.consumers=self.get_consumers()
 
-class ConsumerGroups(object):
+    def get_owners(self):
+        owners=[]
+        for topic in self.zk_client.get_children("/consumers/%s/owners" % (self.gid) )
+            for partition in self.zk_client.get_children("/consumers/%s/owners/%s" % (self.gid,topic,partition) )
+
+    def get_offsets(self):
+        offsets=[]
+        for topic in self.zk_client.get_children("/consumers/%s/offsets" % (self.gid) ):
+            for partition_id in self.zk_client.get_children("/consumers/%s/offsets/%s" % (self.gid,topic))
+                offsets.add(Offset(topic,parttion))
+        return offsets
+            
+class CockRroach(object):
     def __init__(self,zkHost):
         self.ConsumerGroups=[]
         self.zk_client=KazooClient(hosts=zkHost)

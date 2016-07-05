@@ -1,5 +1,6 @@
 #!/usr/bin/python
 """ Simple Zookeeper/Kafka library """
+__author__ = "Adrian Grebin <adrian.grebin@gmail.com>"
 from kazoo.client import KazooClient
 from datetime import datetime
 
@@ -30,17 +31,19 @@ class Consumer(object):
 
 class ConsumerGroup(object):
     """ ConsumerGroup class describes a KafkaConsumer group stored on Zookeeper """
-    def __init__(self, gid, KzClient):
+    def __init__(self, gid, KzClient, show_offsets=False):
         self.gid = gid
         self.zk_client = KzClient
         self.offsets = self.get_offsets()
+        self.show_offsets = show_offsets
     #    self.owners=self.get_owners()
     #    self.consumers=self.get_consumers()
 
     def __str__(self):
         ret = "CG: %s last seen: %s" % (self.gid, self.last_seen())
-        #for offset in self.offsets:
-        #    ret += "--offset: %s/%s %s mtime: %s" % (offset.topic,offset.partition, offset.offset,offset.mtime)
+        if self.show_offsets:
+            for offset in self.offsets:
+                ret += "--offset: %s/%s %s mtime: %s" % (offset.topic,offset.partition, offset.offset,offset.mtime)
         return ret
 
     def last_seen(self):
@@ -76,11 +79,11 @@ class ConsumerGroup(object):
     #            pass
 
 class CockRoach(object):
-    def __init__(self, zkHost):
+    def __init__(self, zkHost, stale_max_days=30):
         self.ConsumerGroups = []
         self.zk_client = KazooClient(hosts=zkHost)
         self.zk_client.start()
-        self.stale_max_days = 30
+        self.stale_max_days = stale_max_days
         if self.zk_client.exists("/consumers"):
             for cg_name in self.zk_client.get_children("/consumers"):
                 self.ConsumerGroups.append(ConsumerGroup(cg_name, \

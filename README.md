@@ -1,5 +1,8 @@
 # CockRoach
-## Python tool manage Kafka information stored in Zookeeper
+## Python tool/api to manage Kafka clusters
+CockRoach is intended to provide an easy way to manage and automate Kafka clusters maintenance from command line or as an API.
+
+It has currently implemented a way to list consumer groups currently registered, and detect Stale Consumer grups and optionally delete them.
 
 ## Requirements:
 Requires python 2.7+, kazoo

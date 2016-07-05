@@ -129,7 +129,7 @@ if __name__ == '__main__':
     argparser.add_argument('zk', help="zookeeper host", default="aquzoosys031010.c031.digitalriverws.net:2182")
     argparser.add_argument('--stale', help="Search for Stale ConsumerGroups (just print)", default=False, action='store_true')
     argparser.add_argument('--delete', help="Delete Stale ConsumerGroups", default=False, action='store_true')
-	argparser.add_argument('--stale_max_days', help="Define after how many days a CG is considered stale", default=30)
+    argparser.add_argument('--stale_max_days', help="Define after how many days a CG is considered stale", default=30)
 
     args = argparser.parse_args()
     cockroach = CockRoach(zkHost=args.zk,stale_max_days)

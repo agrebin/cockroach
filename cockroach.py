@@ -104,7 +104,12 @@ class CockRoach(object):
             print stale_cg
             confirm = raw_input("Delete?")
             if confirm == "Y":
-                print "Deleting %s" % (stale_cg)
+                self.delete_cgroup(stale_cg)
+
+    def delete_cgroup(self, CG):
+        """Deletes a consumer Group"""
+        print "Deleting %s" % (CG.gid)
+        self.zk_client.delete("/consumers/%s" % (CG.gid), version=-1, recursive=True)
 
     def __str__(self):
         ret = ""
@@ -116,15 +121,13 @@ class CockRoach(object):
 if __name__ == '__main__':
     import argparse
 
-    count = 0
-
-    parser = argparse.ArgumentParser(description=\
+    argparser = argparse.ArgumentParser(description=\
                                      "Cleanup stale consumer groups from ZooKeeper")
-    parser.add_argument('zk', help="zookeeper host", default="aquzoosys031010.c031.digitalriverws.net:2182")
-    parser.add_argument('--stale', help="Search for Stale ConsumerGroups (just print)", default=False, action='store_true')
-    parser.add_argument('--delete', help="Delete Stale ConsumerGroups", default=False, action='store_true')
+    argparser.add_argument('zk', help="zookeeper host", default="aquzoosys031010.c031.digitalriverws.net:2182")
+    argparser.add_argument('--stale', help="Search for Stale ConsumerGroups (just print)", default=False, action='store_true')
+    argparser.add_argument('--delete', help="Delete Stale ConsumerGroups", default=False, action='store_true')
 
-    args = parser.parse_args()
+    args = argparser.parse_args()
     cockroach = CockRoach(zkHost=args.zk)
 
     if args.stale:

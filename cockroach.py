@@ -10,7 +10,7 @@ class Topic(object):
         self.parititions=[]
 
 class Offset(object):
-    """ Offset class describes offset for a topic/partition on zookeeper """"
+    """ Offset class describes offset for a topic/partition on zookeeper """
     def __init__(self, topic, partition, offset, mtime):
         self.topic = topic
         self.partition = partition
@@ -18,7 +18,7 @@ class Offset(object):
         self.mtime = datetime.fromtimestamp(mtime/1000)
 
     def __str__(self):
-        return "Offset-->topic:%s,partition:%s,offset:%s, last seen: %s\n" % \
+        return "Offset-->topic:%s,partition:%s,offset:%s, last seen: %s" % \
                (self.topic, self.partition, self.offset, self.mtime)
 
 class Consumer(object):
@@ -38,9 +38,9 @@ class ConsumerGroup(object):
     #    self.consumers=self.get_consumers()
 
     def __str__(self):
-        ret = "CG: %s last seen: %s\n" % (self.gid, self.last_seen())
+        ret = "CG: %s last seen: %s" % (self.gid, self.last_seen())
         #for offset in self.offsets:
-        #    ret += "--offset: %s/%s %s mtime: %s\n" % (offset.topic,offset.partition, offset.offset,offset.mtime)
+        #    ret += "--offset: %s/%s %s mtime: %s" % (offset.topic,offset.partition, offset.offset,offset.mtime)
         return ret
 
     def last_seen(self):
@@ -86,15 +86,25 @@ class CockRoach(object):
                 self.ConsumerGroups.append(ConsumerGroup(cg_name, \
                                                          self.zk_client))
 
-    def get_stale_cgroups(self):
-        """get_stale_cgroups returns ConsumerGroups that were not used for stale_max_days""""
+    def get_stale_cgroups(self, display):
+        """get_stale_cgroups returns ConsumerGroups that were not used for stale_max_days"""
         ret = []
         for cg in self.ConsumerGroups:
             delta = datetime.now() - cg.last_seen().mtime
             if delta.days > self.stale_max_days:
-                print "Stale: %s" % (cg)
+                if display:
+                    print "Stale: %s" % (cg)
                 ret.append(cg)
         return ret
+
+    def delete_stale_cgroups(self):
+        """ Delete consumer groups that are considered stale"""
+        stale_cgroups = self.get_stale_cgroups(display=False)
+        for stale_cg in stale_cgroups:
+            print stale_cg
+            confirm = raw_input("Delete?")
+            if confirm == "Y":
+                print "Deleting %s" % (stale_cg)
 
     def __str__(self):
         ret = ""
@@ -110,9 +120,16 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description=\
                                      "Cleanup stale consumer groups from ZooKeeper")
-    parser.add_argument('zk', help = "zookeeper host", default = "aquzoosys031010.c031.digitalriverws.net:2182")
+    parser.add_argument('zk', help="zookeeper host", default="aquzoosys031010.c031.digitalriverws.net:2182")
+    parser.add_argument('--stale', help="Search for Stale ConsumerGroups (just print)", default=False, action='store_true')
+    parser.add_argument('--delete', help="Delete Stale ConsumerGroups", default=False, action='store_true')
 
     args = parser.parse_args()
-    cockroach = CockRoach(zkHost="aquzoosys031010:2182")
-#    print "CockRoach: %s" % (cockroach)
-    cockroach.get_stale_cgroups()
+    cockroach = CockRoach(zkHost=args.zk)
+
+    if args.stale:
+        cockroach.get_stale_cgroups(display=True)
+    elif args.delete:
+        cockroach.delete_stale_cgroups()
+    else:
+        print "CockRoach: %s" % (cockroach)

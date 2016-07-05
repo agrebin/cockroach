@@ -79,25 +79,29 @@ class ConsumerGroup(object):
     #            pass
 
 class CockRoach(object):
-    def __init__(self, zkHost, stale_max_days=30):
+    def __init__(self, zkHost, stale_max_days=30, assume_yes=False):
         self.ConsumerGroups = []
         self.zk_client = KazooClient(hosts=zkHost)
         self.zk_client.start()
         self.stale_max_days = stale_max_days
+        self.assume_yes = assume_yes
         if self.zk_client.exists("/consumers"):
             for cg_name in self.zk_client.get_children("/consumers"):
                 self.ConsumerGroups.append(ConsumerGroup(cg_name, \
                                                          self.zk_client))
 
     def get_stale_cgroups(self, display):
-        """get_stale_cgroups returns ConsumerGroups that were not used for stale_max_days"""
+        """
+           get_stale_cgroups returns ConsumerGroups
+           that were not used for stale_max_days
+        """
         ret = []
-        for cg in self.ConsumerGroups:
-            delta = datetime.now() - cg.last_seen().mtime
+        for consumergroup in self.ConsumerGroups:
+            delta = datetime.now() - consumergroup.last_seen().mtime
             if delta.days > self.stale_max_days:
                 if display:
-                    print "Stale: %s" % (cg)
-                ret.append(cg)
+                    print "Stale: %s" % (consumergroup)
+                ret.append(consumergroup)
         return ret
 
     def delete_stale_cgroups(self):
@@ -105,14 +109,18 @@ class CockRoach(object):
         stale_cgroups = self.get_stale_cgroups(display=False)
         for stale_cg in stale_cgroups:
             print stale_cg
-            confirm = raw_input("Delete?")
+            if assume_yes:
+                confirm = raw_input("Delete?")
+            else:
+                confirm="Y"
+
             if confirm == "Y":
                 self.delete_cgroup(stale_cg)
 
-    def delete_cgroup(self, CG):
+    def delete_cgroup(self, consumergroup):
         """Deletes a consumer Group"""
-        print "Deleting %s" % (CG.gid)
-        self.zk_client.delete("/consumers/%s" % (CG.gid), version=-1, recursive=True)
+        print "Deleting %s" % (consumergroup.gid)
+        self.zk_client.delete("/consumers/%s" % (consumergroup.gid), version=-1, recursive=True)
 
     def __str__(self):
         ret = ""
@@ -130,9 +138,10 @@ if __name__ == '__main__':
     argparser.add_argument('--stale', help="Search for Stale ConsumerGroups (just print)", default=False, action='store_true')
     argparser.add_argument('--delete', help="Delete Stale ConsumerGroups", default=False, action='store_true')
     argparser.add_argument('--stale_max_days', type=int, help="Define after how many days a CG is considered stale", default=30)
+    argparser.add_argument('--YES', help="Assume Yes on all questions", default=False, action='store_true')
 
     args = argparser.parse_args()
-    cockroach = CockRoach(zkHost=args.zk, stale_max_days=args.stale_max_days)
+    cockroach = CockRoach(zkHost=args.zk, stale_max_days=args.stale_max_days,assume_yes=args.YES)
 
     if args.stale:
         cockroach.get_stale_cgroups(display=True)

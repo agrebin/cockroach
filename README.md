@@ -8,18 +8,23 @@ It has currently implemented a way to list consumer groups currently registered,
 Requires python 2.7+, kazoo
 
 ## SUMMARY
-	usage: cockroach.py [-h] [--stale] [--delete] zk
-	
-	Cleanup stale consumer groups from ZooKeeper
-	
-	positional arguments:
-	  zk          zookeeper host
-	
-	optional arguments:
-	  -h, --help  show this help message and exit
-	  --stale     Search for Stale ConsumerGroups (just print)
-	  --delete    Delete Stale ConsumerGroups
-
+    usage: cockroach.py [-h] [--stale] [--delete_stale]
+                        [--stale_max_days STALE_MAX_DAYS] [--YES] [--preview]
+                        zk
+    
+    Cleanup stale consumer groups from ZooKeeper
+    
+    positional arguments:
+      zk                    zookeeper host
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      --stale               Search for Stale ConsumerGroups (just print)
+      --delete_stale        Delete Stale ConsumerGroups
+      --stale_max_days STALE_MAX_DAYS
+                            Define after how many days a CG is considered stale
+      --YES                 Assume Yes on all questions
+      --preview             Do not execute any modifications
 
 ## SAMPLE RUN
 -bash-4.2$ ./cockroach.py  aquzoosys031010:2182

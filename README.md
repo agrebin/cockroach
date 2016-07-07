@@ -2,12 +2,15 @@
 ## Python tool/api to manage Kafka clusters
 CockRoach is intended to provide an easy way to manage and automate Kafka clusters maintenance from command line or as an API.
 
-It has currently implemented a way to list consumer groups currently registered, and detect Stale Consumer grups and optionally delete them.
+Each time a kafka consumer is registered through a Consumer Group, it gets registered on Kafka's Zookeper store, and it never gets removed, it starts to build up and makes difficult to find inromation about it.
+
+CockRoach at this point has implemented methods to list stale groups (and also delete them if necessary) based on the modification time of the latest offset consumed on each of the topics handled by that Consumer Group.
 
 ## Requirements:
 Requires python 2.7+, kazoo
+Just pip install -r requirements.txt
 
-## SUMMARY
+## Running cli and parameters
     usage: cockroach.py [-h] [--stale] [--delete_stale]
                         [--stale_max_days STALE_MAX_DAYS] [--YES] [--preview]
                         zk

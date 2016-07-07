@@ -36,15 +36,18 @@
 
 <p>CockRoach is intended to provide an easy way to manage and automate Kafka clusters maintenance from command line or as an API.</p>
 
-<p>It has currently implemented a way to list consumer groups currently registered, and detect Stale Consumer grups and optionally delete them.</p>
+<p>Each time a kafka consumer is registered through a Consumer Group, it gets registered on Kafka's Zookeper store, and it never gets removed, it starts to build up and makes difficult to find inromation about it.</p>
+
+<p>CockRoach at this point has implemented methods to list stale groups (and also delete them if necessary) based on the modification time of the latest offset consumed on each of the topics handled by that Consumer Group.</p>
 
 <h2>
 <a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements:</h2>
 
-<p>Requires python 2.7+, kazoo</p>
+<p>Requires python 2.7+, kazoo
+Just pip install -r requirements.txt</p>
 
 <h2>
-<a id="summary" class="anchor" href="#summary" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SUMMARY</h2>
+<a id="running-cli-and-parameters" class="anchor" href="#running-cli-and-parameters" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Running cli and parameters</h2>
 
 <pre><code>usage: cockroach.py [-h] [--stale] [--delete_stale]
                     [--stale_max_days STALE_MAX_DAYS] [--YES] [--preview]
